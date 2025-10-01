@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>名前入力</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; }
+        form { display: flex; gap: .5rem; }
+        input { padding: .5rem; font-size: 1rem; }
+        button { padding: .5rem .75rem; font-size: 1rem; }
+        a { display: inline-block; margin-top: 1rem; }
+    </style>
+    <script>
+      // Guard if DB is not configured
+      if (!document.cookie && !window?.ENV?.DATABASE_URL) {
+        // no-op: purely for local testing placeholder
+      }
+    </script>
+  </head>
+<body>
+    <h1>名前を入力してください</h1>
+    <form action="/greet" method="post">
+        <input type="text" name="name" placeholder="名前を入力" required>
+        <button type="submit">送信</button>
+    </form>
+    <p><a href="/list">登録済み一覧を見る</a></p>
+</body>
+</html>
+
