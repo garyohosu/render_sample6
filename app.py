@@ -5,8 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Prefer DATABASE_URL provided by Render Postgres
-database_url = os.environ.get("DATABASE_URL")
+# Prefer DATABASE_URL provided by Render Postgres; fallback for local dev
+database_url = os.environ.get("DATABASE_URL", "sqlite:///local.db")
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -18,9 +18,12 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)
 
 
-# Flask 3.0 では before_first_request が非推奨のため起動時に作成
-with app.app_context():
-    db.create_all()
+def ensure_tables():
+    try:
+        db.create_all()
+    except Exception:
+        # 起動直後のDB未準備や一時的な接続失敗時でもアプリを起動させる
+        pass
 
 
 @app.route("/")
@@ -31,6 +34,7 @@ def index():
 @app.route("/greet", methods=["POST"])
 def greet():
     name = request.form.get("name", "名無し")
+    ensure_tables()
     new_user = User(name=name)
     db.session.add(new_user)
     db.session.commit()
@@ -39,10 +43,10 @@ def greet():
 
 @app.route("/list")
 def list_users():
+    ensure_tables()
     users = User.query.all()
     return render_template("list.html", users=users)
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
